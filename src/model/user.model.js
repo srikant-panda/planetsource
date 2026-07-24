@@ -1,13 +1,12 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 
 
 const userSchema = new mongoose.Schema({
-    name: { type: String, minlength: 1, maxlength: 50, required: [true, "name is required"] },
-    username: { type: String, minlength: 1, maxlength: 20, required: [true, "username is required"], unique: true, index: true },
-    email: { type: String, minlength: 1, maxlength: 50, required: [true, "email is required"], unique: true, index: true },
+    name: { type: String, minlength: 1, maxlength: 50, required: [true, "name is required"],trim:true },
+    email: { type: String, minlength: 1, maxlength: 50, required: [true, "email is required"], unique: true },
     password: { type: String, minlength: 1, maxlength: 100, required: [true, "password is required"], select: false },
-    avtar: { type: String, minlength: 1, maxlength: 50,default: null },
+    avtar: { type: String, minlength: 1, maxlength: 500,default: null },
 
 }, { timestamps: true })
 
@@ -18,7 +17,7 @@ userSchema.set("toJSON", {
     }
 });
 
-const User = mongoose.model("user", userSchema);
+const User = mongoose.model("User", userSchema);
 
 
 export default User;

@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 // import  JsonWebTokenError, TokenExpiredError from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import { config } from "../../config.js";
+import RefreshToken from "../model/auth.model.js"
 
 
 async function hashData(payload) {
@@ -44,15 +45,23 @@ async function decodeToken(token) {
     try {
         return jwt.verify(token, config.JWT_SECRET);
     } catch (err) {
-        console.error(err.name);
+        // console.error(err.name);
         throw err;
     }
 }
-
+async function storeRefreshToken(refreshToken,userId) {
+    const isRefTKNStred = await RefreshToken.create({
+        userId: userId,
+        refreshTokenHash: await hashData(refreshToken),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    });
+    return isRefTKNStred
+}
 
 export const authUtils = {
     hashData,
     compareHash,
     createToken,
-    decodeToken
+    decodeToken,
+    storeRefreshToken
 }
