@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, minlength: 1, maxlength: 50, required: [true, "name is required"],trim:true },
     email: { type: String, minlength: 1, maxlength: 50, required: [true, "email is required"], unique: true },
     password: { type: String, minlength: 1, maxlength: 100, required: [true, "password is required"], select: false },
-    avtar: { type: String, minlength: 1, maxlength: 500,default: null },
+    avatar: { type: String, minlength: 1, maxlength: 500,default: null },
 
 }, { timestamps: true })
 

@@ -8,13 +8,13 @@ async function registerUser(req, res) {
     try {
         const userDataSchema = [
             "name",
-            "username",
             "email",
             "password",
         ];
-        const isValidRequest = userDataSchema.every((key) => Object.hasOwn(req.body, key));
+        if (Object.hasOwn(req.body, 'avatr')) userDataSchema.push('avatar');
+        const isValidRequest = Object.keys(req.body).every((key) => userDataSchema.includes(key));
         if (!isValidRequest)
-            return res.status(400).json({ message: "every field required and must be correct." });
+            return res.status(400).json({ message: "every field required and must be correct.No access key or no inefficient key" });
         const reqData = req.body;
         if (!validator.isEmail(reqData.email))
             return res.status(400).json({ message: "email should be valid." })
@@ -23,13 +23,13 @@ async function registerUser(req, res) {
         const existingUser = await User.findOne({
             $or: [
                 { email: reqData.email },
-                { username: reqData.username }
+                // { username: reqData.username }
             ]
         });
 
         if (existingUser) {
             return res.status(409).json({
-                message: "User already exists."
+                message: "User already exists with this email."
             });
         }
         const hashedPassword = await authUtils.hashData(reqData.password);
@@ -59,6 +59,7 @@ async function registerUser(req, res) {
             const field = Object.keys(err.keyPattern)[0];
             return res.status(400).json({ message: `${field} already exists` });
         }
+        if (err.name == "MongooseError") return res.status(500).json({ message: "Database connection gone wrong." })
 
         res.status(500).json({ message: "Internal server error", error: err.message, name: err.name });
     }
@@ -150,6 +151,12 @@ async function refresh(req, res) {
 
     }
 }
+
+
+// async function resetPassword(req, res) {
+//     const { oldPassword, newPassword } = req.body;
+
+// }
 
 export const authController = {
     registerUser,

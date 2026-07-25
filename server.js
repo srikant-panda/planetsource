@@ -3,19 +3,16 @@ import { config } from "./config.js"
 import { connectDb } from "./src/utils/database.utils.js"
 import cookieParser from "cookie-parser";
 import { authRouter } from "./src/routes/auth.routes.js"
+import mongoose from "mongoose";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser())
 
-const db = connectDb();
+const db = await connectDb();
 
-db.then((value) => {
-    console.log("Database connected successfully")
-})
-    .catch((err) => {
-        console.log("Database connection failed", err.name)
-    })
+console.log(`MongoDB Connected: ${db.connection.host}, MongoDB Database: ${db.connection.name}`);
+
 
 
 app.get("/", (req, res) => res.json({ message: "PlanetSource has started....." }))
