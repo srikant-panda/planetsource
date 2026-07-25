@@ -153,10 +153,6 @@ async function refresh(req, res) {
 }
 
 
-// async function resetPassword(req, res) {
-//     const { oldPassword, newPassword } = req.body;
-
-// }
 
 export const authController = {
     registerUser,
