@@ -22,8 +22,7 @@ async function registerUser(req, res) {
             return res.status(400).json({ message: "password should have 8 digit , one uppercase , lowercase, digit,special charecter" });
         const existingUser = await User.findOne({
             $or: [
-                { email: reqData.email },
-                // { username: reqData.username }
+                { email: reqData.email }
             ]
         });
 
