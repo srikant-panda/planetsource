@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { config } from "../../config.js";
-import RefreshToken from "../model/auth.model.js"
-
+import Session from "../models/auth.model.js"
+import crypto from "node:crypto"
 
 async function hashData(payload) {
     try {
@@ -15,6 +15,7 @@ async function hashData(payload) {
     }
 }
 
+
 async function compareHash(hashedData, payload) {
     try {
         const isEqual = await bcrypt.compare(payload, hashedData);
@@ -26,14 +27,15 @@ async function compareHash(hashedData, payload) {
 }
 
 
-async function createToken(payload, exp) {
+async function createToken(id, exp) {
     try {
+        const JTI = crypto.randomUUID();
         const token = jwt.sign(
-            { id: payload },
+            { id,JTI },
             config.JWT_SECRET,
             { expiresIn: exp }
         )
-        return token;
+        return { token,JTI }
     } catch (err) {
         console.error(err.name);
         throw err;
@@ -48,13 +50,12 @@ async function decodeToken(token) {
         throw err;
     }
 }
-async function storeRefreshToken(refreshToken,userId) {
-    const isRefTKNStred = await RefreshToken.create({
+async function storeSession(userId,JTI) {
+    const isSesnStred = await Session.create({
         userId: userId,
-        refreshTokenHash: await hashData(refreshToken),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        JTI
     });
-    return isRefTKNStred
+    return isSesnStred
 }
 
 export const authUtils = {
@@ -62,5 +63,5 @@ export const authUtils = {
     compareHash,
     createToken,
     decodeToken,
-    storeRefreshToken
+    storeSession
 }

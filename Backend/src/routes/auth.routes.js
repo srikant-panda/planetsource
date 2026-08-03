@@ -1,15 +1,14 @@
 import { Router } from "express";
-import { authController } from "../controller/auth.controller.js";
-import { getCurrentUser, getRefreshTokenData } from "../middlewares/auth.middleware.js"
+import { authController } from "../controllers/auth.controller.js";
+import { getCurrentUser } from "../middlewares/auth.middleware.js"
 
 const authRouter = Router();
 
 
 authRouter.post("/signup", authController.registerUser);
 authRouter.post("/login", authController.verifyUser);
-authRouter.get("/get-me", getCurrentUser, authController.getMe);  // private route
-authRouter.post("/logout", getCurrentUser, authController.logout); //private route
-authRouter.post("/refresh", getRefreshTokenData, authController.refresh)  // private route
+authRouter.post("/logout", getCurrentUser("refresh"), authController.logout); //private route
+authRouter.post("/refresh", getCurrentUser("refresh"), authController.refresh)  // private route
 
 
 export { authRouter };
