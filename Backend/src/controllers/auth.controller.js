@@ -79,6 +79,14 @@ async function registerUser(req, res) {
 
 async function verifyUser(req, res) {
   try {
+    const isAlrdyLogdin = req.tokenData || null;
+    console.log(isAlrdyLogdin);
+    if(isAlrdyLogdin){
+      return res.json({
+        message:"User already logged in.",
+        success:true
+      })
+    }
     const { email , password } = req.body;
     if (!email || !password)
       return res
@@ -110,6 +118,7 @@ async function verifyUser(req, res) {
 
     res.json({
       message: "User logged in successfully.",
+      success:true
     });
   } catch (err) {
     res.status(500).json({

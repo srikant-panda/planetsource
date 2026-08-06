@@ -2,13 +2,18 @@
 import { authUtils } from "../utils/auth.utils.js";
 import Session from "../models/auth.model.js";
 
-function getCurrentUser(type = "access") {
+function getCurrentUser({ type = "access", optionalAuth = false } = {}) {
   return async (req, res, next) => {
     try {
       const token =
         type.toLowerCase().trim() === "access"
           ? req.headers.authorization?.split(" ")[1]
           : req.cookies?.refreshToken;
+      console.log(type, optionalAuth,token);
+      if (optionalAuth && !token) {
+        req.tokenData = null;
+        return next();
+      }
       if (!token)
         return res.status(401).json({ message: `${type} token required.` });
       if (type.toLowerCase().trim() === "access") {
@@ -19,40 +24,45 @@ function getCurrentUser(type = "access") {
       }
       const tokenData = await authUtils.decodeToken(token);
       if (type.toLowerCase().trim() === "refresh") {
-        const isRevoked = await Session.findOne({ JTI: tokenData.JTI }) || {};
+        const isRevoked = (await Session.findOne({ JTI: tokenData.JTI })) || {};
         if (isRevoked.revoked)
           return res
             .status(404)
             .json({ message: "Token not valid", success: false });
       }
+      console.log("ariveed");
       req.tokenData = tokenData;
       next();
     } catch (err) {
-      if (err.name === "TokenExpiredError") {
-        return res.status(401).json({
-          success: false,
-          code: "TOKEN_EXPIRED",
-          message: "Access token has expired",
-        });
-      }
+      if (optionalAuth) {
+        req.tokenData = null;
+        return next();
+        if (err.name === "TokenExpiredError") {
+          return res.status(401).json({
+            success: false,
+            code: "TOKEN_EXPIRED",
+            message: "Access token has expired",
+          });
+        }
 
-      if (err.name === "JsonWebTokenError") {
-        return res.status(401).json({
-          success: false,
-          code: "INVALID_TOKEN",
-          message: "Invalid access token",
-        });
-      }
+        if (err.name === "JsonWebTokenError") {
+          return res.status(401).json({
+            success: false,
+            code: "INVALID_TOKEN",
+            message: "Invalid access token",
+          });
+        }
 
-      if (err.name === "NotBeforeError") {
-        return res.status(401).json({
-          success: false,
-          code: "TOKEN_NOT_ACTIVE",
-          message: "Token is not active yet",
-        });
-      }
+        if (err.name === "NotBeforeError") {
+          return res.status(401).json({
+            success: false,
+            code: "TOKEN_NOT_ACTIVE",
+            message: "Token is not active yet",
+          });
+        }
 
-      next(err);
+        next(err);
+      }
     }
   };
 }

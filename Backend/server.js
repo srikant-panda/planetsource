@@ -6,6 +6,7 @@ import { authRouter } from "./src/routes/auth.routes.js";
 import { projectRouter } from "./src/routes/project.routes.js";
 import morgan from "morgan";
 import projectController from "./src/controllers/project.controller.js";
+import userRouter from "./src/routes/user.routes.js";
 
 const app = express();
 app.use(morgan('dev'));
@@ -20,7 +21,8 @@ console.log(`MongoDB Connected: ${db.connection.host}, MongoDB Database: ${db.co
 
 app.get("/", (req, res) => res.json({ message: "PlanetSource has started....." }))
 app.use("/api/auth/",authRouter);
-app.use("/api",projectRouter);
+app.use("/api/",projectRouter);
+app.use("/api/user/",userRouter);
 
 
 
